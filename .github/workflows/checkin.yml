@@ -1,0 +1,32 @@
+name: 机场自动签到
+
+on:
+  schedule:
+    # GitHub 用的是 UTC 时间。'10 16 * * *' = 北京时间每天 0:10。
+    # 多加一条做兜底，重复签到会返回「今日已签到」，不会出错。
+    - cron: '10 16 * * *'
+    - cron: '10 1 * * *'   # 北京时间 9:10
+  workflow_dispatch:        # 允许在 Actions 页面点按钮手动运行
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run check-in
+        env:
+          DOMAIN:   ${{ secrets.DOMAIN }}
+          EMAIL:    ${{ secrets.EMAIL }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          COOKIE:   ${{ secrets.COOKIE }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_ID:    ${{ secrets.TG_ID }}
+          BARK_URL: ${{ secrets.BARK_URL }}
+        run: node checkin.js
